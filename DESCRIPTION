@@ -1,0 +1,24 @@
+Package: opendsm
+Type: Package
+Title: A package for automating a digital soil mapping workflow
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "Daniel",
+           family = "Saurette",
+           role = c("aut", "cre"),
+           email = "daniel.saurette@ontario.ca",
+           comment = c(ORCID = "0000-0002-1971-1238")))
+Maintainer: Daniel Saurette <daniel.saurette@ontario.ca>
+Description: This package contains functions for supporting users
+ through a Digital Soil Mapping workflow. Includes functions for
+ creating terrain derivatives to be used as covariates, covariate 
+ reduction to reduce multicolinearity, sample size determination
+ using divergence metrics, and creating predictions using machine
+ learning algorithms.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Depends: R (>= 4.1)
+Imports: DescTools, RSAGA, bestNormalize, clhs, diptest, dplyr, fields, fmsb, ggplot2, ggpubr, magrittr, matrixStats, mixtools,
+ mousetrap, nortest, onsoilsurvey, reshape2, snowfall, stats, terra, whitebox
