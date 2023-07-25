@@ -164,7 +164,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   }
 
   ####################################################################
-  # this loop will calculate the kl divergence, jenson divergence, and jensen distance, JS Distance,
+  # this loop will calculate the kl divergence, jensen divergence, and jensen distance, JS Distance,
   # for each of length(cseq) * s_reps  sample designs
 
   print(paste("COMPUTING DIVERGENCE METRICS FOR  ", length(cseq), "  SAMPLE SIZES * ",
@@ -210,23 +210,23 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
     #mat.f[j,2]<- jsd # value of 0 means no divergence
 
     ## Third test: Jensen Shannon Distance (JSdist)
-    jsdist_loop<- matrix(NA,ncol=1, nrow=ncol(covs))
+    jsdis_loop<- matrix(NA,ncol=1, nrow=ncol(covs))
     for (m in 1:ncol(covs)){
-      jsdist<- jsdist(c(cov.mat[,m]/sum(cov.mat[,m])), c(h.mat[,m]/sum(h.mat[,m])), type= 'count', unit='log2')
-      jsdist_loop[m,1]<- jsdist
+      jsdis<- jsdist(c(cov.mat[,m]/sum(cov.mat[,m])), c(h.mat[,m]/sum(h.mat[,m])), type= 'count', unit='log2')
+      jsdis_loop[m,1]<- jsdis
     }
-    jsdist<- mean(jsdist_loop[,1])
+    jsdis<- mean(jsdis_loop[,1])
 
     # here we will compile the mean test scores for each of j iterations
-    mat.f.temp<- t(rbind(nrow(s.df),klo,jsd,jsdist))
+    mat.f.temp<- t(rbind(nrow(s.df),klo,jsd,jsdis))
     ifelse(exists('mat.f'),mat.f<- rbind(mat.f,mat.f.temp),mat.f<- mat.f.temp)
 
     # here we assign the individual scores to a matrix for further analysis
-    det.f.temp<- t(rbind(nrow(s.df), kl_loop, jsd_loop, jsdist_loop))
+    det.f.temp<- t(rbind(nrow(s.df), kl_loop, jsd_loop, jsdis_loop))
     ifelse(exists('det.seq'),det.seq<- rbind(det.seq,det.f.temp),det.seq<- det.f.temp)
 
     # clean up a few temporary files
-    rm(h.mat, mat.f.temp, det.f.temp, jsd_loop, jsdist_loop, kl_loop, klo, jsd, jsdist)
+    rm(h.mat, mat.f.temp, det.f.temp, jsd_loop, jsdis_loop, kl_loop, klo, jsd, jsdis)
 
     utils::setTxtProgressBar(pb,nn)
 
@@ -502,6 +502,14 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
 
   print(opt_sites)
 
-  return(out=list(optimal_sites=opt_sites, sample_index=s.list, summary=dat.seq, detailed=det.seq))
+  #compile the exp decay and cdf data
+  cdf_data<- as.data.frame(cbind(xx, yy1, normalized, yy2, normalized2, yy3,normalized3))
+  colnames(cdf_data)<- c("Sites","KLDiv","CDF_KLDiv","JSDiv","CDF_JSDiv","JSDist","CDF_JSDist")
+
+  return(out=list(optimal_sites=opt_sites,
+                  sample_index=s.list,
+                  summary=dat.seq,
+                  detailed=det.seq,
+                  cdf=cdf_data))
 
   }
