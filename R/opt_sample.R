@@ -507,7 +507,6 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   colnames(cdf_data)<- c("Sites","KLDiv","CDF_KLDiv","JSDiv","CDF_JSDiv","JSDist","CDF_JSDist")
 
   return(out=list(optimal_sites=opt_sites,
-                  sample_index=s.list,
                   summary=dat.seq,
                   detailed=det.seq,
                   cdf=cdf_data))
