@@ -471,7 +471,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
                    cbind(metric="JSD", jsd.n),
                    cbind(metric="JSDist",jsdist.n))
 
-  rm(kld.n, jsd.n, jsdist.n, det.melt, det.melt2)
+  rm(kld.n, jsd.n, jsdist.n, det.melt)
 
   det.plot$variable<- as.vector(det.plot$variable)
   det.plot$variable<- gsub("kld_","",det.plot$variable)
@@ -510,6 +510,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   return(out=list(optimal_sites=opt_sites,
                   summary=dat.seq,
                   detailed=det.seq,
-                  cdf=cdf_data))
+                  cdf=cdf_data,
+                  melt2=det.melt2))
 
   }
