@@ -141,8 +141,8 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   #quantile matrix of the covariate data
   q.mat<- matrix(NA, nrow=(bins+1), ncol= ncol(covs))
   j=1
-  for (i in 1:ncol(covs)){ #note the index start here
-    #get a quantile matrix together of the covariates
+  for (i in 1:ncol(covs)){
+    #get a quantile matrix of the covariates
     ran1<- max(covs[,i]) - min(covs[,i])
     step1<- ran1/bins
     q.mat[,j]<- seq(min(covs[,i]), to = max(covs[,i]), by =step1)
@@ -200,14 +200,14 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
     #mat.f[j,1]<- klo  # value of 0 means no divergence
 
     ## Second test: Jensen Shannon (JS) divergence
-    #Jensen-Shannon divergence (operates on densities, not counts)
+
     jsd_loop<- matrix(NA,ncol=1, nrow=ncol(covs))
     for (m in 1:ncol(covs)){
       jsd<- jsdiv(c(cov.mat[,m]/sum(cov.mat[,m])), c(h.mat[,m]/sum(h.mat[,m])), type= 'count', unit='log2')
       jsd_loop[m,1]<- jsd
     }
     jsd<- mean(jsd_loop[,1])
-    #mat.f[j,2]<- jsd # value of 0 means no divergence
+
 
     ## Third test: Jensen Shannon Distance (JSdist)
     jsdis_loop<- matrix(NA,ncol=1, nrow=ncol(covs))
@@ -454,16 +454,17 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
     rm(diff, diff_norm)
   }
 
+
   # KL Divergence
-  kld.n<- det.melt2[,c(1,2:11)]
+  kld.n<- det.melt2[,c(1,2:(ncol(covs)+1))]
   kld.n<- reshape2::melt(kld.n,id="samp_nos")
 
   # JS Divergence
-  jsd.n<- det.melt2[,c(1,12:21)]
+  jsd.n<- det.melt2[,c(1,(ncol(covs)+2):(2*ncol(covs)+1))]
   jsd.n<- reshape2::melt(jsd.n,id="samp_nos")
 
   # JS Distance
-  jsdist.n<- det.melt2[,c(1,22:31)]
+  jsdist.n<- det.melt2[,c(1,(2*ncol(covs)+2):(3*ncol(covs)+1))]
   jsdist.n<- reshape2::melt(jsdist.n,id="samp_nos")
 
   det.plot<- rbind(cbind(metric="KLD",kld.n),
