@@ -447,7 +447,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
 
   # and now normalize the values between 0 and 1 for each covariate
   det.melt2<- det.melt
-  for (q in 2:(ncol(det.melt)-1)){
+  for (q in 2:(ncol(det.melt))){
     diff<- det.melt[,q]
     diff_norm<- (diff - min(diff))/(max(diff)-min(diff))
     det.melt2[,q]<- diff_norm
@@ -471,7 +471,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
                    cbind(metric="JSD", jsd.n),
                    cbind(metric="JSDist",jsdist.n))
 
-  rm(kld.n, jsd.n, jsdist.n, det.melt)
+  rm(kld.n, jsd.n, jsdist.n, det.melt, det.melt2)
 
   det.plot$variable<- as.vector(det.plot$variable)
   det.plot$variable<- gsub("kld_","",det.plot$variable)
@@ -510,7 +510,5 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   return(out=list(optimal_sites=opt_sites,
                   summary=dat.seq,
                   detailed=det.seq,
-                  cdf=cdf_data,
-                  melt2=det.melt2))
-
+                  cdf=cdf_data))
   }
