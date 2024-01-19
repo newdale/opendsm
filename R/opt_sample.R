@@ -42,6 +42,7 @@
 #' @importFrom reshape2 melt
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom terra crds values
+#' @importFrom methods is
 #'
 #' @export
 #'
@@ -70,19 +71,19 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
 
   # check the format of the covs object and convert as required
 
-  if(class(covs)[1]=="SpatVector"){
+  if(methods::is(covs,"SpatVector")){
 
     # get the data and the XY coordinates
     coords<- terra::crds(covs, df=TRUE, list=FALSE)
     covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
 
-  } else if(class(covs)[1]=="SpatRaster"){
+  } else if(methods::is(covs,"SpatRaster")){
 
     # get the data and the XY coordinates
     coords<- terra::crds(covs, df=TRUE, na.rm=TRUE)
     covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
 
-  } else if(class(covs)[1]=="data.frame") {
+  } else if(methods::is(covs,"data.frame")) {
     covs<- covs
     coords<- NA
   } else {stop('The function argument "covs" must be either "SpatVector" or "SpatRaster" or "data.frame"')}
@@ -528,7 +529,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
 
   plan_idx<- clhs::clhs(x=covs, size=opt_sites[2,2], iter=clhs_iter, simple=TRUE, progress=FALSE)
 
-  if(class(coords)=="logical"){plan=covs[plan_idx,]
+  if(methods::is(coords,"logical")){plan=covs[plan_idx,]
 
   }else{plan<- cbind(coords[plan_idx,],covs[plan_idx,])}
 
