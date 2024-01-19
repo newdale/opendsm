@@ -41,7 +41,7 @@
 #' @importFrom matrixStats colSds
 #' @importFrom reshape2 melt
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom terra coords values
+#' @importFrom terra crds values
 #'
 #' @export
 #'
