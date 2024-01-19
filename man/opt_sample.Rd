@@ -34,7 +34,7 @@ opt_sample(
 
 \item{bins}{numeric, number of bins for the divergence metric calculation, default is 30}
 
-\item{covs}{data frame, environmental covariates to be used for the sample size determination}
+\item{covs}{data frame or SpacVector or SpatRaster, environmental covariates to be used for the sample size determination}
 
 \item{clhs_iter}{numeric, number of iterations to use for the clhs, default is 10000}
 
@@ -48,6 +48,7 @@ Dataframe 1: Dataframe with optimal sample size based on the three divergence me
 Dataframe 2: List of vectors showing the index of rows for each sample plan evaluated
 Dataframe 3: Dataframe providing mean and standard deviation of divergence metrics across the repetitions
 Dataframe 4: Dataframe showing all raw data - divergence metrics for each covariate at each sample size
+Dataframe 5: Dataframe with sample plan developed using optimal sample size using Jensen-Shannon Divergence
 Figure 1: plots of exponential decay of mean divergence metrics across all covariates with increasing sample size
 Figure 2: plots of exponential decay of normalized divergence metrics for individual covariates with increasing sample size
 }

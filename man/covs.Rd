@@ -14,6 +14,6 @@ https://doi.org/10.1016/j.geoderma.2022.116054
 data(covs)
 }
 \description{
-Covairate data for the Smeltzer farm near Guelph, Ontario
+Covariate data for the Smeltzer farm near Guelph, Ontario
 }
 \keyword{datasets}

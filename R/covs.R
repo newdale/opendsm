@@ -1,6 +1,6 @@
 #' Sample covairate data to demonstrate sample designs
 #'
-#' Covairate data for the Smeltzer farm near Guelph, Ontario
+#' Covariate data for the Smeltzer farm near Guelph, Ontario
 #'
 #' @docType data
 #'

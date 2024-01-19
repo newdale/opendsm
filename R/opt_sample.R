@@ -16,7 +16,7 @@
 #' @param s_step numeric, sample size step for testing, default is 20
 #' @param s_reps numeric, number of repetitions of the sample design, default is 2, must be >1
 #' @param bins numeric, number of bins for the divergence metric calculation, default is 30
-#' @param covs data frame, environmental covariates to be used for the sample size determination
+#' @param covs data frame or SpacVector or SpatRaster, environmental covariates to be used for the sample size determination
 #' @param clhs_iter numeric, number of iterations to use for the clhs, default is 10000
 #' @param cpus numeric, number of CPUs to be used for parallel processing, default is 1/2 of virtual CPUs
 #' @param conf numeric, confidence used to select optimal sample size from the CDF, default is 0.95
@@ -26,6 +26,7 @@
 #' Dataframe 2: List of vectors showing the index of rows for each sample plan evaluated
 #' Dataframe 3: Dataframe providing mean and standard deviation of divergence metrics across the repetitions
 #' Dataframe 4: Dataframe showing all raw data - divergence metrics for each covariate at each sample size
+#' Dataframe 5: Dataframe with sample plan developed using optimal sample size using Jensen-Shannon Divergence
 #' Figure 1: plots of exponential decay of mean divergence metrics across all covariates with increasing sample size
 #' Figure 2: plots of exponential decay of normalized divergence metrics for individual covariates with increasing sample size
 #'
@@ -40,6 +41,7 @@
 #' @importFrom matrixStats colSds
 #' @importFrom reshape2 melt
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom terra coords values
 #'
 #' @export
 #'
@@ -66,6 +68,26 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   covs<- covs
   clhs_iter<- clhs_iter
 
+  # check the format of the covs object and convert as required
+
+  if(class(covs)[1]=="SpatVector"){
+
+    # get the data and the XY coordinates
+    coords<- terra::crds(covs, df=TRUE, list=FALSE)
+    covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
+
+  } else if(class(covs)[1]=="SpatRaster"){
+
+    # get the data and the XY coordinates
+    coords<- terra::crds(covs, df=TRUE, na.rm=TRUE)
+    covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
+
+  } else if(class(covs)[1]=="data.frame") {
+    covs<- covs
+    coords<- NA
+  } else {stop('The function argument "covs" must be either "SpatVector" or "SpatRaster" or "data.frame"')}
+
+
   cpus<- if(is.null(cpus)){parallel::detectCores()*0.5
   }else{cpus<- cpus}
 
@@ -75,7 +97,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   covs.list<- rep(list(covs),s_reps) # note the index start here
 
   #here we use if statement and run either clhs or fcs, as requested by user
-  if(is.null(alg)){stop('The function argument "type"alg" must be either "clhs" or "fcs"')
+  if(is.null(alg)){stop('The function argument "alg" must be either "clhs" or "fcs"')
 
     }else if(alg=="clhs"){
 
@@ -503,6 +525,15 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
 
   print(opt_sites)
 
+
+  plan_idx<- clhs::clhs(x=covs, size=opt_sites[2,2], iter=clhs_iter, simple=TRUE, progress=FALSE)
+
+  if(class(coords)=="logical"){plan=covs[plan_idx,]
+
+  }else{plan<- cbind(coords[plan_idx,],covs[plan_idx,])}
+
+
+
   #compile the exp decay and cdf data
   cdf_data<- as.data.frame(cbind(xx, yy1, normalized, yy2, normalized2, yy3,normalized3))
   colnames(cdf_data)<- c("Sites","KLDiv","CDF_KLDiv","JSDiv","CDF_JSDiv","JSDist","CDF_JSDist")
@@ -510,5 +541,6 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   return(out=list(optimal_sites=opt_sites,
                   summary=dat.seq,
                   detailed=det.seq,
-                  cdf=cdf_data))
+                  cdf=cdf_data,
+                  sample_plan=plan))
   }
