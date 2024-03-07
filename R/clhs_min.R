@@ -19,8 +19,8 @@
 #' Object 4. Dataframe 'Bimodality' provides the results of bimodality assessment for covariates deemd to be bimodal
 #' Object 5. List 'Hist_Original' containing histogtram objects for each covariate
 #' Object 6. List 'Hist_Transformed' containing histogram objects for all transformed covariates, including the bimodal covariates whose distributions were split
-#' Object 7. List 'VIF_Results' containing the outputs of the variance inflation factor analysis
-#' Object 8. Dataframe with sample plan developed using median of minimum sample size
+#' Object 7. Dataframe with sample plan developed using median of minimum sample size
+#' Object 8. List 'VIF_Results' containing the outputs of the variance inflation factor analysis (optional)
 #'
 #' @export
 #'
@@ -249,9 +249,9 @@ clhs_min<- function(covs,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
   names(clhs.size.out)<- c("Sample_Size","Transformations","Results","Bimodality",
                            "Hist_Original","Hist_Transformed", "Sample_Plan")
   }else if(vif==TRUE){
-    clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal,y, plan)
+    clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal,plan,y)
     names(clhs.size.out)<- c("Sample_Size","Transformations","Results","Bimodality",
-                           "Hist_Original","Hist_Transformed", "VIF_Results", "Sample_Plan")}
+                           "Hist_Original","Hist_Transformed", "Sample_Plan", "VIF_Results")}
 
   return(clhs.size.out)
 }
