@@ -22,3 +22,4 @@ RoxygenNote: 7.2.3
 Depends: R (>= 4.1)
 Imports: DescTools, RSAGA, bestNormalize, clhs, diptest, dplyr, fields, fmsb, ggplot2, ggpubr, magrittr, matrixStats, methods, mixtools,
  mousetrap, nortest, onsoilsurvey, reshape2, snowfall, stats, terra, whitebox
+Remotes: newdale/onsoilsurvey
