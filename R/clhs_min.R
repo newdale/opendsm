@@ -6,7 +6,7 @@
 #' Determining minimum sample size for the conditioned Latin hypercube sampling algorithm
 #' DOI: https://doi.org/10.1016/j.pedsph.2022.09.001
 #'
-#' @param x dataframe*, each column holds values for a covariate
+#' @param covs dataframe*, data frame or SpacVector or SpatRaster, environmental covariates to be used for the sample size determination
 #' @param lq, numeric*, lower quantile of choice for the confidence interval, default value = 0.05
 #' @param uq, numeric*, upper quantile of choice for the confidence interval, default value = 0.95
 #' @param vif, logical*, use variance inflation factor to reduce multicolinearity, default = FALSE
@@ -20,6 +20,7 @@
 #' Object 5. List 'Hist_Original' containing histogtram objects for each covariate
 #' Object 6. List 'Hist_Transformed' containing histogram objects for all transformed covariates, including the bimodal covariates whose distributions were split
 #' Object 7. List 'VIF_Results' containing the outputs of the variance inflation factor analysis
+#' Object 8. Dataframe with sample plan developed using median of minimum sample size
 #'
 #' @export
 #'
@@ -30,37 +31,59 @@
 #' @importFrom bestNormalize bestNormalize
 #' @importFrom mixtools normalmixEM
 #' @importFrom onsoilsurvey oss.seqVIF
+#' @importFrom terra crds values
 #'
 #' @examples
 #' data(covs)
-#' out<- clhs_min(x=covs, lq=0.05,uq=0.95, vif=TRUE, vif.thresh=10)
+#' out<- clhs_min(covs=covs, lq=0.05,uq=0.95, vif=TRUE, vif.thresh=10)
 #'
 #'
 #'
 #'
 #'
-clhs_min<- function(x,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
+clhs_min<- function(covs,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
+
+  # preprocessing of input data
+  # check the format of the covs object and convert as required
+
+  if(methods::is(covs,"SpatVector")){
+
+    # get the data and the XY coordinates
+    coords<- terra::crds(covs, df=TRUE, list=FALSE)
+    covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
+
+  } else if(methods::is(covs,"SpatRaster")){
+
+    # get the data and the XY coordinates
+    coords<- terra::crds(covs, df=TRUE, na.rm=TRUE)
+    covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
+
+  } else if(methods::is(covs,"data.frame")) {
+    covs<- covs
+    coords<- NA
+  } else {stop('The function argument "covs" must be either "SpatVector" or "SpatRaster" or "data.frame"')}
+
 
   # Step 0: use variance inflation factor to remove multicollinearity in the predictors
   if(vif==TRUE){
-    y<- seqVIF(x,thresh=vif.thresh, trace=FALSE, show.R2.vals=FALSE)
-    x<- x[,y$Covariates_retained]}
+    y<- onsoilsurvey::oss.seqVIF(covs,thresh=vif.thresh, trace=FALSE, show.R2.vals=FALSE)
+    covs<- covs[,y$Covariates_retained]}
 
 
 
   # Step 1: test for bimodal distribution of covariates
 
-  for (j in 1:ncol(x)){
+  for (j in 1:ncol(covs)){
     # check for multimodality using the bimodality coefficient test and Hartigan's Dip Test
-    yy<- round(mousetrap::bimodality_coefficient(x[,j]),4)
-    xx<- diptest::dip.test(x[,j])
+    yy<- round(mousetrap::bimodality_coefficient(covs[,j]),4)
+    xx<- diptest::dip.test(covs[,j])
     xx<- xx[[2]]
     #run anderson darling test for normality
-    zz<- nortest::ad.test(x[,j])
+    zz<- nortest::ad.test(covs[,j])
     zz<- zz$p.value
 
     #bind the results
-    temp<- cbind(colnames(x[j]),yy,xx,zz)
+    temp<- cbind(colnames(covs[j]),yy,xx,zz)
     ifelse(exists('bidat.f'), bidat.f<- rbind(bidat.f,temp), bidat.f<- temp)
     colnames(bidat.f)<- c("Covariate","Bimodal_Coeff","DipTest","AD_Test")
   }
@@ -85,19 +108,19 @@ clhs_min<- function(x,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
 
   #create a list of vectors from the unimodal not normal data
   if(length(univec>0)){
-    dat2<- as.list(as.data.frame(x[,univec]))
+    dat2<- as.list(as.data.frame(covs[,univec]))
     names(dat2)<- univec
   }else{dat2<- list()}
 
   #create a list of vectors from the unimodal normal data
   if(length(uninorm>0)){
-    dat<- as.list(as.data.frame(x[,uninorm]))
+    dat<- as.list(as.data.frame(covs[,uninorm]))
     names(dat)<- uninorm
   }else{dat<- list()}
 
   # now we need to run the separation of the multimodal covariates, but only if we have some
   if(length(bivec>0)){
-    bi.df<- as.data.frame(x[,bivec])
+    bi.df<- as.data.frame(covs[,bivec])
     names(bi.df)<- bivec
     bi.df<- bi.df[,order(names(bi.df))]
     bi.df<- as.data.frame(bi.df)
@@ -146,9 +169,9 @@ clhs_min<- function(x,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
   histo.order<- c(uninorm, univec,sort(rep(bivec,2)))
 
   # here we will store histograms for each covariate in its original form
-  for (i in 1:length(x)){
-    n<- grDevices::nclass.FD(x[[i]])
-    d1<- graphics::hist(x[[i]], breaks=seq(min(x[i]),max(x[i]),l=n+1), plot=FALSE)
+  for (i in 1:length(covs)){
+    n<- grDevices::nclass.FD(covs[[i]])
+    d1<- graphics::hist(covs[[i]], breaks=seq(min(covs[i]),max(covs[i]),l=n+1), plot=FALSE)
     histo.orig[[i]] <- d1
   }
 
@@ -214,14 +237,21 @@ clhs_min<- function(x,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
   if(exists("tname")){tname<-tname
   }else{tname<- c("No data transformations required")}
 
+  #generate a sample plan
+  plan_idx<- clhs::clhs(x=covs, size=sum.f[1,3], iter=10000, simple=TRUE, progress=FALSE)
+
+  if(methods::is(coords,"logical")){plan=covs[plan_idx,]
+
+  }else{plan<- cbind(coords[plan_idx,],covs[plan_idx,])}
+
   if(vif==FALSE){
-  clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal)
+  clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal, plan)
   names(clhs.size.out)<- c("Sample_Size","Transformations","Results","Bimodality",
-                           "Hist_Original","Hist_Transformed")
+                           "Hist_Original","Hist_Transformed", "Sample_Plan")
   }else if(vif==TRUE){
-    clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal,y)
+    clhs.size.out<- list(sum.f,tname,dat.f,bidat.f, histo.orig, histo.normal,y, plan)
     names(clhs.size.out)<- c("Sample_Size","Transformations","Results","Bimodality",
-                           "Hist_Original","Hist_Transformed", "VIF_Results")}
+                           "Hist_Original","Hist_Transformed", "VIF_Results", "Sample_Plan")}
 
   return(clhs.size.out)
 }
