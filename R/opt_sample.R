@@ -511,7 +511,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   fig2<- ggplot2::ggplot(data=det.plot, ggplot2::aes(x=samp_nos, y=value, color=variable))+
     ggplot2::geom_line(linewidth=1)+
     ggplot2::theme_bw()+
-    ggplot2::guides(color=ggplot2::guide_legend(ncol=2))+
+    ggplot2::guides(color=ggplot2::guide_legend(ncol=4))+
     ggplot2::facet_wrap(~metric, nrow=2, ncol=2, labeller=ggplot2::labeller(metric=lab1))+
     ggplot2::labs(y= "Normalized Divergence",x="Sample Size") +
     ggplot2::theme(axis.text = ggplot2::element_text(size =14),
