@@ -458,7 +458,7 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
                    axis.title.y = ggplot2::element_text(size =14))
 
 
-  fig1<- ggpubr::ggarrange(p1,p3,p5,p2,p4,p6,nrow=2,ncol=3, align="v")
+  fig1<- suppressWarnings(ggpubr::ggarrange(p1,p3,p5,p2,p4,p6,nrow=2,ncol=3, align="v"))
   ggpubr::annotate_figure(fig1,bottom=ggpubr::text_grob("Sample Size", size=16))
   plot(fig1)
 
