@@ -10,8 +10,9 @@ and Jenson-Shannon Distance}
 \usage{
 opt_sample(
   alg = "clhs",
-  s_min,
-  s_max,
+  cseq,
+  s_min = NULL,
+  s_max = NULL,
   s_step = 20,
   s_reps = 2,
   bins = 30,
@@ -23,6 +24,8 @@ opt_sample(
 }
 \arguments{
 \item{alg, }{character, either "clhs" or "fcs", default is "clhs"}
+
+\item{cseq, }{numeric vector, provide a sequence of sample sizes}
 
 \item{s_min}{numeric, minimum sample size to be tested}
 
@@ -60,6 +63,6 @@ DOI: https://doi.org/10.1016/j.geoderma.2023.116553
 \examples{
 # import the example data and run with 4 reps
 data(covs)
-out<- opt_sample(alg="clhs", s_min=10, s_max=400, s_step=20, s_reps=4, covs= covs, clhs_iter=100, cpus=NULL, conf=0.95)
+out<- opt_sample(alg="clhs", cseq=seq(from=20, to=400, by=20), s_reps=4, covs= covs, clhs_iter=100, cpus=NULL, conf=0.95)
 
 }

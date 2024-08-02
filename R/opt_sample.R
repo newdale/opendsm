@@ -94,8 +94,9 @@ opt_sample<- function(alg="clhs", cseq, s_min=NULL, s_max=NULL, s_step=20, s_rep
           }else if(is.null(cpus) & s_reps>parallel::detectCores()){parallel::detectCores()*0.75
           }else{cpus<- cpus}
 
-  cpus<- if(cpus>parallel::detectCores()){warning("CPUs requested exceed CPUs on this machine. Using 75% of detected CPUs.")}
-  cpus<- if(cpus>parallel::detectCores()){parallel::detectCores()*0.75}
+  if(cpus>parallel::detectCores()){warning("CPUs requested exceed CPUs on this machine. Using 75% of detected CPUs.")}
+  cpus<- if(cpus>parallel::detectCores()){parallel::detectCores()*0.75
+    }else{cpus<-cpus}
 
   cseq<- if(exists("cseq")){cseq
     }else{round(seq(s_min, s_max, (s_max-s_min)/s_step))}
