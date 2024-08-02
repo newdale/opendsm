@@ -11,6 +11,7 @@
 #' DOI: https://doi.org/10.1016/j.geoderma.2023.116553
 #'
 #' @param alg, character, either "clhs" or "fcs", default is "clhs"
+#' @param cseq, numeric vector, provide a sequence of sample sizes
 #' @param s_min numeric, minimum sample size to be tested
 #' @param s_max numeric, maximum sample size to be tested
 #' @param s_step numeric, sample size step for testing, default is 20
@@ -49,10 +50,10 @@
 #' @examples
 #' # import the example data and run with 4 reps
 #' data(covs)
-#' out<- opt_sample(alg="clhs", s_min=10, s_max=400, s_step=20, s_reps=4, covs= covs, clhs_iter=100, cpus=NULL, conf=0.95)
+#' out<- opt_sample(alg="clhs", cseq=seq(from=20, to=400, by=20), s_reps=4, covs= covs, clhs_iter=100, cpus=NULL, conf=0.95)
 #'
 
-opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, covs, clhs_iter=10000, cpus=NULL, conf=0.95){
+opt_sample<- function(alg="clhs", cseq, s_min=NULL, s_max=NULL, s_step=20, s_reps=2, bins=30, covs, clhs_iter=10000, cpus=NULL, conf=0.95){
 
   mean_JS <- mean_JSdist <- mean_KL <- samp_nos <- sd_JS <- sd_JSdist <- sd_KL <- value <- variable<- NULL
 
@@ -62,12 +63,13 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   ###############################################################################################################
   ###############################################################################################################
 
-  s_min<- s_min
-  s_max<- s_max
-  s_step<- s_step
   bins<- bins
   covs<- covs
   clhs_iter<- clhs_iter
+
+  if(is.null(cseq) & is.null(s_min) & is.null(s_max)){
+    stop("The cseq, s_min and s_max arguments are all empty. Either provide a vector of sample sizes to cseq or provide the min and max sample sizes to be evaluated.")
+  }
 
   # check the format of the covs object and convert as required
 
@@ -95,7 +97,8 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
   cpus<- if(cpus>parallel::detectCores()){warning("CPUs requested exceed CPUs on this machine. Using 75% of detected CPUs.")}
   cpus<- if(cpus>parallel::detectCores()){parallel::detectCores()*0.75}
 
-  cseq<- round(seq(s_min, s_max, (s_max-s_min)/s_step))
+  cseq<- if(exists("cseq")){cseq
+    }else{round(seq(s_min, s_max, (s_max-s_min)/s_step))}
 
   # prepare a list of the dataframe from which to sample, replicate the covariates 's_reps' times
   covs.list<- rep(list(covs),s_reps) # note the index start here
