@@ -84,13 +84,16 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
     covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
 
   } else if(methods::is(covs,"data.frame")) {
-    covs<- covs
+    covs<- as.data.frame(covs)
     coords<- NA
   } else {stop('The function argument "covs" must be either "SpatVector" or "SpatRaster" or "data.frame"')}
 
+  cpus<- if(is.null(cpus) & s_reps<parallel::detectCores()){s_reps
+          }else if(is.null(cpus) & s_reps>parallel::detectCores()){parallel::detectCores()*0.75
+          }else{cpus<- cpus}
 
-  cpus<- if(is.null(cpus)){parallel::detectCores()*0.5
-  }else{cpus<- cpus}
+  cpus<- if(cpus>parallel::detectCores()){warning("CPUs requested exceed CPUs on this machine. Using 75% of detected CPUs.")}
+  cpus<- if(cpus>parallel::detectCores()){parallel::detectCores()*0.75}
 
   cseq<- round(seq(s_min, s_max, (s_max-s_min)/s_step))
 
@@ -515,13 +518,14 @@ opt_sample<- function(alg="clhs", s_min, s_max, s_step=20, s_reps=2, bins=30, co
     ggplot2::facet_wrap(~metric, nrow=2, ncol=2, labeller=ggplot2::labeller(metric=lab1))+
     ggplot2::labs(y= "Normalized Divergence",x="Sample Size") +
     ggplot2::theme(axis.text = ggplot2::element_text(size =14),
-                   legend.text=ggplot2::element_text(size=12),
+                   legend.text=ggplot2::element_text(size=12, hjust=0),
                    legend.text.align=0,
                    axis.title.x = ggplot2::element_text(size =14, face="bold"),
                    axis.title.y = ggplot2::element_text(size =14, face="bold"),
                    strip.text.x = ggplot2::element_text(size=12, face="bold"),
                    legend.title= ggplot2::element_text(size=14, face='bold'),
-                   legend.position = c(0.75,0.25))
+                   legend.position = "inside",
+                   legend.position.inside = c(0.75,0.25))
   plot(fig2)
 
   print(opt_sites)
