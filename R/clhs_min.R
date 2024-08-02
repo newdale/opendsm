@@ -59,7 +59,7 @@ clhs_min<- function(covs,lq=0.05,uq=0.95, vif=FALSE, vif.thresh=5){
     covs<- terra::values(covs, dataframe=TRUE, na.rm=TRUE)
 
   } else if(methods::is(covs,"data.frame")) {
-    covs<- covs
+    covs<- as.data.frame(covs)
     coords<- NA
   } else {stop('The function argument "covs" must be either "SpatVector" or "SpatRaster" or "data.frame"')}
 
