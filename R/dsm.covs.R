@@ -370,7 +370,7 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
 
   # stack the wbt outputs, re-assign the CRS and export to the final folder
   wbt_stack <- terra::rast(list.files(path=temp_wd_wbt, pattern="*.tif", full.names=T, recursive=FALSE))
-  crs(wbt_stack)<- crs(dsm.crs)
+  crs(wbt_stack)<- dsm.crs
 
   ## Write tiffs
   terra::writeRaster(wbt_stack,
