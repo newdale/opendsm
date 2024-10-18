@@ -34,9 +34,12 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
   # create directory for the rasters and a temp directory for intermediate files
   dir.create(paste(temp,"/covs", sep=""))
   dir.create(paste(temp,"/covs/tmp", sep=""))
+  dir.create(paste(temp,"/covs/tmp/wbt", sep=""))
   wd<- paste(temp,"/covs", sep="")
   temp_wd<- paste(temp,"/covs/tmp", sep="")
+  temp_wd_wbt<- paste(temp,"/covs/tmp/wbt", sep="")
   terra::writeRaster(x,paste0(temp_wd,"/elev_in.tif", sep=""))
+  dsm.crs<- crs(x)
 
   DEM<- paste0(temp_wd,"/elev_in.tif", sep="")
 
@@ -290,14 +293,14 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
 
   for(i in filters){
     whitebox::wbt_diff_from_mean_elev(dem = DEM,
-                                      output = paste0(wd,"/dime",i,".tif", sep=""),
+                                      output = paste0(temp_wd_wbt,"/dime",i,".tif", sep=""),
                                       filterx=i,
                                       filtery=i)
   }
 
   for(i in filters){
     whitebox::wbt_dev_from_mean_elev(dem = DEM,
-                                     output = paste0(wd,"/deme",i,".tif", sep=""),
+                                     output = paste0(temp_wd_wbt,"/deme",i,".tif", sep=""),
                                      filterx=i,
                                      filtery=i)
   }
@@ -305,22 +308,22 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
   # Maximum Elevation Deviation should be run 3 times at various filter ranges: 3 to f2, f2 to f3 and f3 to f4
 
   whitebox::wbt_max_elevation_deviation(dem= DEM,
-                                        out_mag= paste0(wd,"/med",f2,".tif", sep=""),
-                                        out_scale= paste0(wd,"/meds",f2,".tif", sep=""),
+                                        out_mag= paste0(temp_wd_wbt,"/med",f2,".tif", sep=""),
+                                        out_scale= paste0(temp_wd_wbt,"/meds",f2,".tif", sep=""),
                                         min_scale= 3,
                                         max_scale=f2,
                                         step= 2)
 
   whitebox::wbt_max_elevation_deviation(dem= DEM,
-                                        out_mag= paste0(wd,"/med",f3,".tif", sep=""),
-                                        out_scale= paste0(wd,"/meds",f3,".tif", sep=""),
+                                        out_mag= paste0(temp_wd_wbt,"/med",f3,".tif", sep=""),
+                                        out_scale= paste0(temp_wd_wbt,"/meds",f3,".tif", sep=""),
                                         min_scale= f2,
                                         max_scale=f3,
                                         step= 2)
 
   whitebox::wbt_max_elevation_deviation(dem= DEM,
-                                        out_mag= paste0(wd,"/med",f4,".tif", sep=""),
-                                        out_scale= paste0(wd,"/meds",f4,".tif", sep=""),
+                                        out_mag= paste0(temp_wd_wbt,"/med",f4,".tif", sep=""),
+                                        out_scale= paste0(temp_wd_wbt,"/meds",f4,".tif", sep=""),
                                         min_scale= f3,
                                         max_scale=f4,
                                         step= 2)
@@ -328,21 +331,21 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
   # Maximum Difference from Mean Elevation should be run 3 times at various filter ranges: 3 to f2, f2 to f3 and f3 to f4
 
   whitebox::wbt_max_difference_from_mean(dem= DEM,
-                                         out_mag= paste0(wd,"/mdm",f2,".tif", sep=""),
-                                         out_scale= paste0(wd,"/mdms",f2,".tif", sep=""),
+                                         out_mag= paste0(temp_wd_wbt,"/mdm",f2,".tif", sep=""),
+                                         out_scale= paste0(temp_wd_wbt,"/mdms",f2,".tif", sep=""),
                                          min_scale= 3,
                                          max_scale=f2,
                                          step= 1)
 
   whitebox::wbt_max_difference_from_mean(dem= DEM,
-                                         out_mag= paste0(wd,"/mdm",f3,".tif", sep=""),
-                                         out_scale= paste0(wd,"/mdms",f3,".tif", sep=""),
+                                         out_mag= paste0(temp_wd_wbt,"/mdm",f3,".tif", sep=""),
+                                         out_scale= paste0(temp_wd_wbt,"/mdms",f3,".tif", sep=""),
                                          min_scale= f2,
                                          max_scale=f3,
                                          step= 1)
 
-  whitebox::wbt_max_difference_from_mean(dem= DEM, out_mag= paste0(wd,"/mdm",f4,".tif", sep=""),
-                                         out_scale= paste0(wd,"/mdms",f4,".tif", sep=""),
+  whitebox::wbt_max_difference_from_mean(dem= DEM, out_mag= paste0(temp_wd_wbt,"/mdm",f4,".tif", sep=""),
+                                         out_scale= paste0(temp_wd_wbt,"/mdms",f4,".tif", sep=""),
                                          min_scale= f3,
                                          max_scale=f4,
                                          step= 1)
@@ -352,7 +355,7 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
 
   for(i in filters){
     whitebox::wbt_elev_percentile(dem = DEM,
-                                  output = paste0(wd,"/ep",i,".tif", sep=""),
+                                  output = paste0(temp_wd_wbt,"/ep",i,".tif", sep=""),
                                   filterx=i,
                                   filtery=i,
                                   sig_digits = 2)}
@@ -360,10 +363,20 @@ dsm.covs<- function(x, wdir=NULL, cpus=NULL){
   # Impoundment Size Index
 
   whitebox::wbt_impoundment_size_index(dem = DEM,
-                                       out_mean = paste0(wd,"/isi_mean.tif", sep=""),
-                                       out_max = paste0(wd,"/isi_max.tif", sep=""),
+                                       out_mean = paste0(temp_wd_wbt,"/isi_mean.tif", sep=""),
+                                       out_max = paste0(temp_wd_wbt,"/isi_max.tif", sep=""),
                                        damlength = 10)
 
+
+  # stack the wbt outputs, re-assign the CRS and export to the final folder
+  wbt_stack <- terra::rast(list.files(path=temp_wd_wbt, pattern="*.tif", full.names=T, recursive=FALSE))
+  crs(wbt_stack)<- crs(dsm.crs)
+
+  ## Write tiffs
+  terra::writeRaster(wbt_stack,
+                     filename = paste0(wd,"/", names(wbt_stack), '.tif'),
+                     filetype="GTiff",
+                     overwrite=TRUE)
 
   #Remove temporary files
   unlink(temp_wd, recursive = TRUE)
